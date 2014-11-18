@@ -23,3 +23,15 @@ C:\Users\AmericaIvone\Documents\Visual Studio 2013\Projects\setup2Kinects\setup2
 C:\Users\AmericaIvone\Documents\Visual Studio 2013\Projects\setup2Kinects\setup2Kinects\obj\x86\Debug\setup2Kinects.g.resources
 C:\Users\AmericaIvone\Documents\Visual Studio 2013\Projects\setup2Kinects\setup2Kinects\obj\x86\Debug\setup2Kinects.Properties.Resources.resources
 C:\Users\AmericaIvone\Documents\Visual Studio 2013\Projects\setup2Kinects\setup2Kinects\obj\x86\Debug\setup2Kinects.csproj.GenerateResource.Cache
+C:\Users\AmericaIvone\2kinect\setup2Kinects\setup2Kinects\obj\x86\Debug\setup2Kinects.exe
+C:\Users\AmericaIvone\2kinect\setup2Kinects\setup2Kinects\obj\x86\Debug\setup2Kinects.pdb
+C:\Users\AmericaIvone\2kinect\setup2Kinects\setup2Kinects\obj\x86\Debug\setup2Kinects.csprojResolveAssemblyReference.cache
+C:\Users\AmericaIvone\2kinect\setup2Kinects\setup2Kinects\obj\x86\Debug\MainWindow.baml
+C:\Users\AmericaIvone\2kinect\setup2Kinects\setup2Kinects\obj\x86\Debug\MainWindow.g.cs
+C:\Users\AmericaIvone\2kinect\setup2Kinects\setup2Kinects\obj\x86\Debug\App.g.cs
+C:\Users\AmericaIvone\2kinect\setup2Kinects\setup2Kinects\obj\x86\Debug\setup2Kinects_MarkupCompile.cache
+C:\Users\AmericaIvone\2kinect\setup2Kinects\setup2Kinects\obj\x86\Debug\setup2Kinects.g.resources
+C:\Users\AmericaIvone\2kinect\setup2Kinects\setup2Kinects\obj\x86\Debug\setup2Kinects.Properties.Resources.resources
+C:\Users\AmericaIvone\2kinect\setup2Kinects\setup2Kinects\obj\x86\Debug\setup2Kinects.csproj.GenerateResource.Cache
+C:\Users\AmericaIvone\2kinect\setup2Kinects\setup2Kinects\bin\Debug\setup2Kinects.exe
+C:\Users\AmericaIvone\2kinect\setup2Kinects\setup2Kinects\bin\Debug\setup2Kinects.pdb

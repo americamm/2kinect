@@ -20,86 +20,126 @@ namespace setup2Kinects
     /// </summary>
     public partial class MainWindow : Window
     {   
-        
+        //Declaracion de variables 
         KinectSensor kinect1;
-        KinectSensor kinect2; 
-        
+        KinectSensor kinect2;
+        int color1Stride;
+        int color2Stride; 
+        //int depth1Stride; 
+        //int depth2Stride;
+        //short[] pixelesDepth1;
+        //short[] pixelesDepth2;
+        byte[] pixelesColor1;
+        byte[] pixelesColor2; 
+        //byte[] colorDepth1; 
+        //byte[] colorDepth2; 
+        Int32Rect rect1Color;
+        Int32Rect rect2Color;
+        //Int32Rect rect1Depth;
+        //Int32Rect rect2Depth; 
+        WriteableBitmap bitmap1Color;
+        WriteableBitmap bitmap2Color;
+        //WriteableBitmap bitmap1Depth;
+        //WriteableBitmap bitmap2Depth; 
+
+
         public MainWindow()
         {
             InitializeComponent();
+            CompositionTarget.Rendering += CompositionTarget_Rendering;
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        void CompositionTarget_Rendering(object sender, EventArgs e)
         {
-            if (KinectSensor.KinectSensors.Count == 0) 
+            InicializaKinects();
+            PollStreamColor();
+            //PollStreamDepth();
+        }
+
+        private void InicializaKinects()
+        {
+            if (KinectSensor.KinectSensors.Count == 0)
             {
                 MessageBox.Show("No se ha detectado ningun kinect.", "Error");
-                Application.Current.Shutdown(); 
+                Application.Current.Shutdown();
             }
+            else
+            { 
+                try
+                {
+                    kinect1 = KinectSensor.KinectSensors[0];
+                    kinect2 = KinectSensor.KinectSensors[1];
 
-            try
-            {
-                kinect1 = KinectSensor.KinectSensors[0];
-                kinect2 = KinectSensor.KinectSensors[1];
+                    kinect1.Start();
+                    kinect2.Start();
 
-                kinect1.Start();
-                kinect2.Start();
+                    kinect1.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
+                    kinect2.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
 
-                kinect1.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
-                kinect2.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
+                    /*kinect1.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
+                    kinect1.DepthStream.Range = DepthRange.Near;
+                    kinect2.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
+                    kinect2.DepthStream.Range = DepthRange.Near;*/
 
-                kinect1.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
-                kinect1.DepthStream.Range = DepthRange.Near; 
-                kinect2.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
-                kinect2.DepthStream.Range = DepthRange.Near; 
+                    ColorImageStream colorStream1 = kinect1.ColorStream;
+                    ColorImageStream colorStream2 = kinect2.ColorStream;
 
-                kinect1.AllFramesReady += kinect1_AllFramesReady;
-                kinect2.AllFramesReady += kinect2_AllFramesReady;
-           
-            }
-            catch
-            {
-                MessageBox.Show("Ocurrio un error al iniciar los dispositivos Kinects.");
-                Application.Current.Shutdown(); 
+                    pixelesColor1 = new byte[colorStream1.FramePixelDataLength];
+                    pixelesColor2 = new byte[colorStream2.FramePixelDataLength];
+
+                    color1Stride = colorStream1.FrameWidth * colorStream1.FrameBytesPerPixel;
+                    color2Stride = colorStream2.FrameWidth * colorStream2.FrameBytesPerPixel;
+
+                    rect1Color = new Int32Rect(0, 0, colorStream1.FrameWidth, colorStream1.FrameHeight);
+                    rect2Color = new Int32Rect(0, 0, colorStream2.FrameWidth, colorStream2.FrameHeight);
+
+                    bitmap1Color = new WriteableBitmap(colorStream1.FrameWidth, colorStream1.FrameHeight, 96, 96, PixelFormats.Bgr32, null);
+                    bitmap2Color = new WriteableBitmap(colorStream2.FrameWidth, colorStream2.FrameHeight, 96, 96, PixelFormats.Bgr32, null);
+
+                    viewKinect1.Source = bitmap1Color;
+                    viewKinect2.Source = bitmap2Color; 
+                }
+                catch
+                {
+                    MessageBox.Show("Ocurrio un error al iniciar los dispositivos Kinects.");
+                    Application.Current.Shutdown();
+                }
             }
             
         }
 
-        
-        byte[] pixelesKinect1 = null;       //Arreglo donde se guardan los pixeles de los datos de color que proporciona el stream.
-        byte[] pixelesKinect2 = null;
-
-        short[] distanciaKinect1 = null;    //Arreglo donde se guardan los datos de profundidad que proporciona el stream.
-        short[] distanciaKinect2 = null;
-
-        byte[] colorDepth1 = null;          //Arreglo para convertir las distancias a color. 
-        byte[] colorDepth2 = null; 
-
-        WriteableBitmap bitmapKinect1 = null;       //Bitmap para mostrar la imagen a color.
-        WriteableBitmap bitmapKinect2 = null;
-
-        WriteableBitmap bitmapDepth1 = null;        //Bitmap para mostrar la profundidad con colorcitos. 
-        WriteableBitmap bitmapDepth2 = null; 
-
-
-        void kinect1_AllFramesReady(object sender, AllFramesReadyEventArgs e)
+        private void PollStreamColor()
         {
-            using (ColorImageFrame frameKinect1 = e.OpenColorImageFrame())
+            try
             {
-                if (frameKinect1 == null) return;
-
-                pixelesKinect1 = new byte[frameKinect1.PixelDataLength];
-                frameKinect1.CopyPixelDataTo(pixelesKinect1);
-
-                if (bitmapKinect1 == null)
-                { 
-                    bitmapKinect1 = new WriteableBitmap(frameKinect1.Width, frameKinect1.Height, 96, 96, PixelFormats.Bgr32, null);
+                using (ColorImageFrame frame1 = kinect1.ColorStream.OpenNextFrame(100), frame2 = kinect2.ColorStream.OpenNextFrame(100))
+                {
+                    if (frame1 != null)
+                    {
+                        frame1.CopyPixelDataTo(pixelesColor1);
+                        bitmap1Color.WritePixels(rect1Color, pixelesColor1, color1Stride, 0);
+                    }
+                    if (frame2 != null)
+                    {
+                        frame2.CopyPixelDataTo(pixelesColor2);
+                        bitmap1Color.WritePixels(rect2Color, pixelesColor2, color2Stride, 0); 
+                    }
                 }
+            }
+            catch
+            {
+                MessageBox.Show("No se pueden leer los datos del dispositivo", "Error");
+                Application.Current.Shutdown();
+            }
+        } 
 
-                bitmapKinect1.WritePixels(new Int32Rect(0, 0, frameKinect1.Width, frameKinect1.Height), pixelesKinect1, frameKinect1.Width * frameKinect1.BytesPerPixel, 0);
-                viewKinect1.Source = bitmapKinect1; 
-            } 
+        /*private void PollStreamDepth()
+        {
 
+        }*/
+
+        /*void kinect1_AllFramesReady(object sender, AllFramesReadyEventArgs e)
+        {
             using(DepthImageFrame frameDepth1 = e.OpenDepthImageFrame())
             {
                 if (frameDepth1 == null) return;
@@ -153,83 +193,7 @@ namespace setup2Kinects
                 bitmapDepth1.WritePixels(new Int32Rect(0, 0, frameDepth1.Width, frameDepth1.Height), colorDepth1, frameDepth1.Width * 4, 0);
                 viewDepth1.Source = bitmapDepth1; 
             }
-        }
+        }*/
         
-        
-        void kinect2_AllFramesReady(object sender, AllFramesReadyEventArgs e)
-        {
-            using (ColorImageFrame frameKinect2 = e.OpenColorImageFrame())
-            {
-                if (frameKinect2 == null) return;
-
-                pixelesKinect2 = new byte[frameKinect2.PixelDataLength]; 
-                frameKinect2.CopyPixelDataTo(pixelesKinect2);
-
-                if (bitmapKinect2 == null)
-                {
-                    bitmapKinect2 = new WriteableBitmap(frameKinect2.Width, frameKinect2.Height, 96, 96, PixelFormats.Bgr32, null);
-                }
-
-                bitmapKinect2.WritePixels(new Int32Rect(0,0,frameKinect2.Width,frameKinect2.Height),pixelesKinect2,frameKinect2.Width*frameKinect2.BytesPerPixel,0); 
-                viewKinect2.Source = bitmapKinect2; 
-            }
-
-            using (DepthImageFrame frameDepth2 = e.OpenDepthImageFrame())
-            {
-                if (frameDepth2 == null) return;
-                
-                if (distanciaKinect2 == null)
-                {
-                    distanciaKinect2 = new short[frameDepth2.PixelDataLength];
-                }
-                
-                if (colorDepth2 == null)
-                {
-                    colorDepth2 = new byte[frameDepth2.PixelDataLength * 4];
-                } 
-
-                frameDepth2.CopyPixelDataTo(distanciaKinect2);
-
-                int index = 0;
-                for (int i = 0; i < frameDepth2.PixelDataLength; i++)
-                {
-                    int valorDist = distanciaKinect2[i] >> 3;
-
-                    if (valorDist == kinect2.DepthStream.UnknownDepth)
-                    {
-                        colorDepth2[index] = 0;         //B
-                        colorDepth2[index + 1] = 0;     //G
-                        colorDepth2[index + 2] = 255;   //R
-
-                    } 
-                    else if (valorDist == kinect2.DepthStream.TooFarDepth)
-                    {
-                        colorDepth2[index] = 255;           //B
-                        colorDepth2[index + 1] = 0;         //G
-                        colorDepth2[index + 2] = 0;         //R
-                    }
-                    else
-                    {
-                        byte byteDistancia = (byte)(255 - (valorDist >> 5));
-                        colorDepth2[index] = byteDistancia;         //B
-                        colorDepth2[index + 1] = byteDistancia;     //G
-                        colorDepth2[index + 2] = byteDistancia;     //R
-                    }
-              
-                    index = index + 4;
-                }
-
-                if (bitmapDepth2 == null)
-                {
-                    bitmapDepth2 = new WriteableBitmap(frameDepth2.Width, frameDepth2.Height, 96, 96, PixelFormats.Bgr32, null);
-                }
-
-                bitmapDepth2.WritePixels(new Int32Rect(0, 0, frameDepth2.Width, frameDepth2.Height), colorDepth2, frameDepth2.Width * 4, 0);
-                viewDepth2.Source = bitmapDepth2; 
-
-            }
-            
-        }
-
     }
 }
