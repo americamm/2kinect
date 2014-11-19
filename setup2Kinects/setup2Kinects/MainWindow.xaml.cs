@@ -25,22 +25,22 @@ namespace setup2Kinects
         KinectSensor kinect2;
         int color1Stride;
         int color2Stride; 
-        //int depth1Stride; 
-        //int depth2Stride;
-        //short[] pixelesDepth1;
-        //short[] pixelesDepth2;
+        int depth1Stride; 
+        int depth2Stride;
+        short[] pixelesDepth1;
+        short[] pixelesDepth2;
         byte[] pixelesColor1;
         byte[] pixelesColor2; 
-        //byte[] colorDepth1; 
-        //byte[] colorDepth2; 
+        byte[] colorDepth1; 
+        byte[] colorDepth2; 
         Int32Rect rect1Color;
         Int32Rect rect2Color;
-        //Int32Rect rect1Depth;
-        //Int32Rect rect2Depth; 
+        Int32Rect rect1Depth;
+        Int32Rect rect2Depth; 
         WriteableBitmap bitmap1Color;
         WriteableBitmap bitmap2Color;
-        //WriteableBitmap bitmap1Depth;
-        //WriteableBitmap bitmap2Depth; 
+        WriteableBitmap bitmap1Depth;
+        WriteableBitmap bitmap2Depth; 
 
 
         public MainWindow()
@@ -53,7 +53,7 @@ namespace setup2Kinects
         {
             InicializaKinects();
             PollStreamColor();
-            //PollStreamDepth();
+            PollStreamDepth();
         }
 
         private void InicializaKinects()
@@ -75,29 +75,42 @@ namespace setup2Kinects
 
                     kinect1.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
                     kinect2.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
-
-                    /*kinect1.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
+                    kinect1.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
                     kinect1.DepthStream.Range = DepthRange.Near;
                     kinect2.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
-                    kinect2.DepthStream.Range = DepthRange.Near;*/
+                    kinect2.DepthStream.Range = DepthRange.Near;
 
                     ColorImageStream colorStream1 = kinect1.ColorStream;
                     ColorImageStream colorStream2 = kinect2.ColorStream;
+                    DepthImageStream depthStream1 = kinect1.DepthStream;
+                    DepthImageStream depthStream2 = kinect2.DepthStream; 
 
                     pixelesColor1 = new byte[colorStream1.FramePixelDataLength];
                     pixelesColor2 = new byte[colorStream2.FramePixelDataLength];
+                    pixelesDepth1 = new short[depthStream1.FramePixelDataLength];
+                    pixelesDepth2 = new short[depthStream2.FramePixelDataLength];
+                    colorDepth1 = new byte[depthStream1.FramePixelDataLength * 4];
+                    colorDepth2 = new byte[depthStream2.FramePixelDataLength * 4]; 
 
                     color1Stride = colorStream1.FrameWidth * colorStream1.FrameBytesPerPixel;
                     color2Stride = colorStream2.FrameWidth * colorStream2.FrameBytesPerPixel;
-
+                    depth1Stride = depthStream1.FrameWidth * 4;
+                    depth2Stride = depthStream2.FrameWidth * 4; 
+                    
                     rect1Color = new Int32Rect(0, 0, colorStream1.FrameWidth, colorStream1.FrameHeight);
                     rect2Color = new Int32Rect(0, 0, colorStream2.FrameWidth, colorStream2.FrameHeight);
+                    rect1Depth = new Int32Rect(0, 0, depthStream1.FrameWidth, depthStream1.FrameHeight);
+                    rect2Depth = new Int32Rect(0, 0, depthStream2.FrameWidth, depthStream2.FrameHeight); 
 
                     bitmap1Color = new WriteableBitmap(colorStream1.FrameWidth, colorStream1.FrameHeight, 96, 96, PixelFormats.Bgr32, null);
                     bitmap2Color = new WriteableBitmap(colorStream2.FrameWidth, colorStream2.FrameHeight, 96, 96, PixelFormats.Bgr32, null);
+                    bitmap1Depth = new WriteableBitmap(depthStream1.FrameWidth, depthStream1.FrameHeight, 96, 96, PixelFormats.Bgr32, null);
+                    bitmap2Depth = new WriteableBitmap(depthStream2.FrameWidth, depthStream2.FrameHeight, 96, 96, PixelFormats.Bgr32, null); 
 
                     viewKinect1.Source = bitmap1Color;
-                    viewKinect2.Source = bitmap2Color; 
+                    viewKinect2.Source = bitmap2Color;
+                    viewDepth1.Source = bitmap1Depth;
+                    viewDepth2.Source = bitmap2Depth;
                 }
                 catch
                 {
@@ -122,7 +135,7 @@ namespace setup2Kinects
                     if (frame2 != null)
                     {
                         frame2.CopyPixelDataTo(pixelesColor2);
-                        bitmap1Color.WritePixels(rect2Color, pixelesColor2, color2Stride, 0); 
+                        bitmap2Color.WritePixels(rect2Color, pixelesColor2, color2Stride, 0); 
                     }
                 }
             }
@@ -133,67 +146,89 @@ namespace setup2Kinects
             }
         } 
 
-        /*private void PollStreamDepth()
+        private void PollStreamDepth()
         {
-
-        }*/
-
-        /*void kinect1_AllFramesReady(object sender, AllFramesReadyEventArgs e)
-        {
-            using(DepthImageFrame frameDepth1 = e.OpenDepthImageFrame())
+            try
             {
-                if (frameDepth1 == null) return;
-
-                if (distanciaKinect1 == null) 
+                using (DepthImageFrame frame1 = kinect1.DepthStream.OpenNextFrame(100), frame2 = kinect2.DepthStream.OpenNextFrame(100))
                 {
-                    distanciaKinect1 = new short[frameDepth1.PixelDataLength];
-                }
-
-                if (colorDepth1 == null)
-                {
-                    colorDepth1= new byte[frameDepth1.PixelDataLength*4];
-
-                }
-                
-                frameDepth1.CopyPixelDataTo(distanciaKinect1);
-
-                int index = 0; 
-                for (int i=0; i<frameDepth1.PixelDataLength; i++)
-                {   
-                    int valorDist = distanciaKinect1[i] >> 3;
-
-                    if (valorDist == kinect1.DepthStream.UnknownDepth)
+                    if (frame1 != null)
                     {
-                        colorDepth1[index] = 0;         //B
-                        colorDepth1[index+1] = 0;       //G
-                        colorDepth1[index + 2] = 255;   //R
-                    }
-                    else if (valorDist == kinect1.DepthStream.TooFarDepth)
-                    {
-                        colorDepth1[index] = 255;       //B
-                        colorDepth1[index + 1] = 0;     //G
-                        colorDepth1[index + 2] = 0;     //R
-                    }
-                    else
-                    {
-                        byte byteDistancia = (byte)(255 - (valorDist >> 5));
-                        colorDepth1[index] = byteDistancia;         //azul
-                        colorDepth1[index+1] = byteDistancia;       //verde
-                        colorDepth1[index + 2] = byteDistancia;     //rojo
-                    }
-            
-                    index = index + 4; 
-                } 
+                        frame1.CopyPixelDataTo(pixelesDepth1);
 
-                if (bitmapDepth1 == null )
-                {
-                    bitmapDepth1 = new WriteableBitmap(frameDepth1.Width,frameDepth1.Height,96,96,PixelFormats.Bgr32,null);
+                        int index = 0;
+                        for (int i = 0; i < frame1.PixelDataLength; i++)
+                        {
+                            int valorDist = pixelesDepth1[i] >> 3;
+
+                            if (valorDist == kinect1.DepthStream.UnknownDepth)
+                            {
+                                colorDepth1[index] = 0;           //B
+                                colorDepth1[index + 1] = 0;       //G
+                                colorDepth1[index + 2] = 255;     //R
+                            }
+                            else if (valorDist == kinect1.DepthStream.TooFarDepth)
+                            {
+                                colorDepth1[index] = 255;       //B
+                                colorDepth1[index + 1] = 0;     //G
+                                colorDepth1[index + 2] = 0;     //R
+                            }
+                            else
+                            {
+                                byte byteDistancia = (byte)(255 - (valorDist >> 5));
+                                colorDepth1[index] = byteDistancia;         //azul
+                                colorDepth1[index + 1] = byteDistancia;       //verde
+                                colorDepth1[index + 2] = byteDistancia;     //rojo
+                            }
+
+                            index = index + 4;
+                        }
+
+                        bitmap1Depth.WritePixels(rect1Depth, colorDepth1, depth1Stride, 0); 
+                    }
+
+                    if (frame2 != null)
+                    {
+                        frame2.CopyPixelDataTo(pixelesDepth2);
+                        
+                        int index = 0;
+                        for (int i = 0; i < frame2.PixelDataLength; i++)
+                        {
+                            int valorDist = pixelesDepth2[i] >> 3;
+
+                            if (valorDist == kinect2.DepthStream.UnknownDepth)
+                            {
+                                colorDepth2[index] = 0;         //B
+                                colorDepth2[index + 1] = 0;       //G
+                                colorDepth2[index + 2] = 255;   //R
+                            }
+                            else if (valorDist == kinect2.DepthStream.TooFarDepth)
+                            {
+                                colorDepth2[index] = 255;       //B
+                                colorDepth2[index + 1] = 0;     //G
+                                colorDepth2[index + 2] = 0;     //R
+                            }
+                            else
+                            {
+                                byte byteDistancia = (byte)(255 - (valorDist >> 5));
+                                colorDepth2[index] = byteDistancia;         //azul
+                                colorDepth2[index + 1] = byteDistancia;       //verde
+                                colorDepth2[index + 2] = byteDistancia;     //rojo
+                            }
+
+                            index = index + 4; 
+                        }
+
+                        bitmap2Depth.WritePixels(rect2Depth, colorDepth2, depth2Stride, 0); 
+                    }
                 }
-
-                bitmapDepth1.WritePixels(new Int32Rect(0, 0, frameDepth1.Width, frameDepth1.Height), colorDepth1, frameDepth1.Width * 4, 0);
-                viewDepth1.Source = bitmapDepth1; 
             }
-        }*/
+            catch 
+            {
+                MessageBox.Show("Los datos del dispositivo no han sido captados", "Error");
+            }
+        }
+
         
     }
 }

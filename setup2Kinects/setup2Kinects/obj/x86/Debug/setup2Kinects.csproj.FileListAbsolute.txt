@@ -35,3 +35,16 @@ C:\Users\AmericaIvone\2kinect\setup2Kinects\setup2Kinects\obj\x86\Debug\setup2Ki
 C:\Users\AmericaIvone\2kinect\setup2Kinects\setup2Kinects\obj\x86\Debug\setup2Kinects.csproj.GenerateResource.Cache
 C:\Users\AmericaIvone\2kinect\setup2Kinects\setup2Kinects\bin\Debug\setup2Kinects.exe
 C:\Users\AmericaIvone\2kinect\setup2Kinects\setup2Kinects\bin\Debug\setup2Kinects.pdb
+C:\Users\Invitado\Documents\2kinects\setup2Kinects\setup2Kinects\obj\x86\Debug\setup2Kinects.exe
+C:\Users\Invitado\Documents\2kinects\setup2Kinects\setup2Kinects\obj\x86\Debug\setup2Kinects.pdb
+C:\Users\Invitado\Documents\2kinects\setup2Kinects\setup2Kinects\bin\Debug\setup2Kinects.exe
+C:\Users\Invitado\Documents\2kinects\setup2Kinects\setup2Kinects\bin\Debug\setup2Kinects.pdb
+C:\Users\Invitado\Documents\2kinects\setup2Kinects\setup2Kinects\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Invitado\Documents\2kinects\setup2Kinects\setup2Kinects\obj\x86\Debug\MainWindow.baml
+C:\Users\Invitado\Documents\2kinects\setup2Kinects\setup2Kinects\obj\x86\Debug\MainWindow.g.cs
+C:\Users\Invitado\Documents\2kinects\setup2Kinects\setup2Kinects\obj\x86\Debug\App.g.cs
+C:\Users\Invitado\Documents\2kinects\setup2Kinects\setup2Kinects\obj\x86\Debug\setup2Kinects_MarkupCompile.cache
+C:\Users\Invitado\Documents\2kinects\setup2Kinects\setup2Kinects\obj\x86\Debug\setup2Kinects.g.resources
+C:\Users\Invitado\Documents\2kinects\setup2Kinects\setup2Kinects\obj\x86\Debug\setup2Kinects.Properties.Resources.resources
+C:\Users\Invitado\Documents\2kinects\setup2Kinects\setup2Kinects\obj\x86\Debug\GenerateResource.read.1.tlog
+C:\Users\Invitado\Documents\2kinects\setup2Kinects\setup2Kinects\obj\x86\Debug\GenerateResource.write.1.tlog
